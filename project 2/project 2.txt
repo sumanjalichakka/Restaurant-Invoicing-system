@@ -1,0 +1,391 @@
+from tkinter import *
+import random
+import datetime
+
+operator = ''
+food_price = [50, 75.6, 250.89, 780.89, 100.78, 89.78, 76.87, 89.09]
+drink_price = [50, 75.6, 250.89, 780.89, 100.78, 89.78, 76.87, 98.70]
+dessert_price = [50, 75.6, 250.89, 780.89, 100.78, 89.78, 76.87, 87.68]
+
+def create_invoice():
+    invoice_text.delete(1.0, END)
+    invoice_number = f'N# - {random.randint(1000, 9999)}'
+    my_date = datetime.datetime.now()
+    invoice_date = f'{my_date.month}/{my_date.day}/{my_date.year} - {my_date.hour}:{my_date.minute}'
+    invoice_text.insert(END, f'INFORMATION: \t{invoice_number}\t\t\t{invoice_date}\n')
+    invoice_text.insert(END, f'*' * 76 + '\n')
+    invoice_text.insert(END, f'items\t\tquantity\t\titems cost\n')
+    invoice_text.insert(END, f'-' * 92 + '\n')
+
+    x = 0
+    for f in food_text:
+        if f.get() != '0':
+            invoice_text.insert(END, f'{food_list[x]}\t\t{f.get()}\t\t' f'{int(f.get()) * food_price[x]}\n')
+        x += 1
+
+    x = 0
+    for f in drink_text:
+        if f.get() != '0':
+            invoice_text.insert(END, f'{drink_list[x]}\t\t{f.get()}\t'
+                                     f'{int(f.get()) * drink_price[x]}\n')
+        x += 1
+
+    x = 0
+    for f in dessert_text:
+        if f.get() != '0':
+            invoice_text.insert(END, f'{dessert_list[x]}\t\t{f.get()}\t'
+                                     f'{int(f.get()) * dessert_price[x]}\n')
+        x += 1
+
+    invoice_text.insert(END, f'*' * 76 + '\n')
+    invoice_text.insert(END, f'Food subtotal: \t\t\t{food_cost_var.get()}\n')
+    invoice_text.insert(END, f'drink subtotal: \t\t\t{drink_cost_var.get()}\n')
+    invoice_text.insert(END, f'dessert subtotal: \t\t\t{dessert_cost_var.get()}\n')
+
+    invoice_text.insert(END, f'-' * 92 + '\n')
+
+    invoice_text.insert(END, f'subtotal: \t\t\t{subtotal_cost_var.get()}\n')
+    invoice_text.insert(END, f'Taxes: \t\t\t{taxes_cost_var.get()}\n')
+    invoice_text.insert(END, f'Total: \t\t\t{Total_cost_var.get()}\n')
+
+    invoice_text.insert(END, f'-' * 92 + '\n')
+
+def click_button(character):
+    global operator
+    operator = operator + character
+    calculator_display.delete(0, END)
+    calculator_display.insert(END, operator)
+
+def delete_all():
+    global operator
+    operator = ''
+    calculator_display.delete(0, END)
+
+def get_result():
+    global operator
+    result = str(eval(operator))
+    calculator_display.delete(0, END)
+    calculator_display.insert(0, result)
+    operator = ''
+
+def review_check():
+    x = 0
+    for b in food_box:
+        if food_variables[x].get() == 1:
+            food_box[x].config(state=NORMAL)
+            if food_box[x].get()==0:
+               food_box[x].delete(0, END)
+            # focus ids used for a blinking cursor
+            # so that we can type anything
+            food_box[x].focus()
+
+        else:
+            food_box[x].config(state=DISABLED)
+            food_text[x].set('0')
+        x+=1
+
+    x = 0
+    for b in drink_box:
+        if drink_variables[x].get() == 1:
+            drink_box[x].config(state=NORMAL)
+            if drink_box[x].get() == 0:
+               drink_box[x].delete(0, END)
+            drink_box[x].focus()
+
+        else:
+            drink_box[x].config(state=DISABLED)
+            drink_text[x].set('0')
+        x += 1
+
+    x = 0
+    for b in dessert_box:
+        if dessert_variables[x].get() == 1:
+            dessert_box[x].config(state=NORMAL)
+            if dessert_box[x].get() == 0:
+               dessert_box[x].delete(0, END)
+            dessert_box[x].focus()
+
+        else:
+            dessert_box[x].config(state=DISABLED)
+            dessert_text[x].set('0')
+        x += 1
+
+def total_calculation():
+    food_subtotal = 0
+    p = 0
+    for unit in food_text:
+        food_subtotal = food_subtotal + (float(unit.get()) * food_price[p])
+        p += 1
+
+
+    drink_subtotal = 0
+    p = 0
+    for unit in drink_text:
+        drink_subtotal = drink_subtotal + (float(unit.get()) * drink_price[p])
+        p += 1
+
+
+    dessert_subtotal = 0
+    p = 0
+    for unit in dessert_text:
+        dessert_subtotal = dessert_subtotal + (float(unit.get()) * dessert_price[p])
+        p += 1
+
+    my_subtotal = food_subtotal + drink_subtotal + dessert_subtotal
+    my_taxes = my_subtotal * 0.11
+    my_total = my_subtotal + my_taxes
+
+    food_cost_var.set(round(food_subtotal, 2))
+    drink_cost_var.set(round(drink_subtotal, 2))
+    dessert_cost_var.set(round(dessert_subtotal, 2))
+    subtotal_cost_var.set(round(my_subtotal, 2))
+    taxes_cost_var.set(round(my_taxes, 2))
+    Total_cost_var.set(round(my_total, 2))
+
+# Initialize Tkinter
+application = Tk()
+
+# Window Title
+application.title("Restaurant - Invoicing System")
+
+# Window size
+application.geometry('1180x600')
+
+# Preventing from maximizing
+application.resizable(False, False)
+
+# Window background colour
+application.config(bg='burlywood')
+
+# Top Panel
+top_panel = Frame(application, bd=1, relief=FLAT)
+top_panel.pack(side=TOP)
+
+# Title tag
+title_tag = Label(top_panel, text='INVOICING SYSTEM', fg='azure4', font=('Dosis', 48), bg='burlywood', width=27)
+title_tag.grid(row=0, column=0)
+
+# Left Panel
+left_panel = Frame(application, bd=1, relief=FLAT)
+left_panel.pack(side=LEFT)
+
+# Cost panel
+cost_panel = Frame(left_panel, bd=1, relief=FLAT, bg='azure4', padx=50)
+cost_panel.pack(side=BOTTOM)
+
+# Food panel
+food_panel = LabelFrame(left_panel, text='Food', fg='azure4', font=('Dosis', 19, 'bold'), bd=1, relief=FLAT)
+food_panel.pack(side=LEFT)
+
+# Drink panel
+drink_panel = LabelFrame(left_panel, text='Drink', fg='azure4', font=('Dosis', 19, 'bold'), bd=1, relief=FLAT)
+drink_panel.pack(side=LEFT)
+
+# Dessert panel
+dessert_panel = LabelFrame(left_panel, text='Dessert', fg='azure4', font=('Dosis', 19, 'bold'), bd=1, relief=FLAT)
+dessert_panel.pack(side=LEFT)
+
+# right Panel
+right_panel = Frame(application, bd=1, relief=FLAT)
+right_panel.pack(side=LEFT)
+
+# Calculator panel
+calculator_panel = Frame(right_panel, bd=1, relief=FLAT, bg='burlywood')
+calculator_panel.pack()
+
+# invoice panel
+invoice_panel = Frame(right_panel, bd=1, relief=FLAT, bg='burlywood')
+invoice_panel.pack()
+
+# buttons panel
+buttons_panel = Frame(right_panel, bd=1, relief=FLAT, bg='burlywood')
+buttons_panel.pack()
+
+# Product Lists
+food_list = ['Chicken', 'Lamb', 'salmon', 'Chicken1', 'Lamb1', 'salmon1', 'Pizza1', 'Pizza2']
+drink_list = ['Lemonade', 'soda', 'juice', 'cola', 'soda1', 'juice1', 'cola1', 'beer']
+dessert_list = ['Ice cream', 'Fruit', 'Brownies', 'pudding', 'Fruit1', 'Brownies1', 'pudding1', 'cake']
+
+food_variables = []
+food_box = []
+food_text = []
+counter = 0
+for food in food_list:
+
+    # Create Checkbuttons
+    food_variables.append('')
+    food_variables[counter] = IntVar()
+    food = Checkbutton(food_panel, text=food.title(), font=('Dosis', 19, 'bold'), onvalue=1, offvalue=0,
+                       variable=food_variables[counter],
+                       command=review_check)
+    food.grid(row=counter, column=0, sticky=W)
+
+    # Create input boxes
+    food_box.append('')
+    food_text.append('')
+    food_text[counter] = StringVar()
+    food_text[counter].set('0')
+    food_box[counter] = Entry(food_panel, font=('Dosis', 18, 'bold'), bd=1, width=6, state=DISABLED,
+                              textvariable=food_text[counter])
+    food_box[counter].grid(row=counter, column=1)
+    counter += 1
+
+drink_variables = []
+drink_box = []
+drink_text = []
+counter = 0
+for drink in drink_list:
+    drink_variables.append('')
+    drink_variables[counter] = IntVar()
+    drink = Checkbutton(drink_panel, text=drink.title(), font=('Dosis', 19, 'bold'), onvalue=1, offvalue=0,
+                        variable=drink_variables[counter], command=review_check)
+    drink.grid(row=counter, column=0, sticky=W)
+
+    # Create input boxes
+    drink_box.append('')
+    drink_text.append('')
+    drink_text[counter] = StringVar()
+    drink_text[counter].set('0')
+    drink_box[counter] = Entry(drink_panel, font=('Dosis', 18, 'bold'), bd=1, width=6, state=DISABLED,
+                              textvariable=drink_text[counter])
+    drink_box[counter].grid(row=counter, column=1)
+    counter += 1
+
+dessert_variables = []
+dessert_box = []
+dessert_text = []
+counter = 0
+for dessert in dessert_list:
+    dessert_variables.append('')
+    dessert_variables[counter] = IntVar()
+    dessert = Checkbutton(dessert_panel, text=dessert.title(), font=('Dosis', 19, 'bold'), onvalue=1, offvalue=0,
+                          variable=dessert_variables[counter], command=review_check)
+    dessert.grid(row=counter, column=0, sticky=W)
+
+    # Create input boxes
+    dessert_box.append('')
+    dessert_text.append('')
+    dessert_text[counter] = StringVar()
+    dessert_text[counter].set('0')
+    dessert_box[counter] = Entry(dessert_panel, font=('Dosis', 18, 'bold'), bd=1, width=6, state=DISABLED,
+                              textvariable=dessert_text[counter])
+    dessert_box[counter].grid(row=counter, column=1)
+    counter += 1
+
+# Variables
+food_cost_var = StringVar()
+
+# Cost labels and input fields
+food_cost_panel = Label(cost_panel, text='Food Cost', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+food_cost_panel.grid(row=0, column=0)
+food_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=food_cost_var)
+food_cost_text.grid(row=0, column=1, padx=41)
+
+# Variables
+drink_cost_var=StringVar()
+
+# Cost labels and input fields
+drink_cost_panel = Label(cost_panel, text='Drink Cost', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+drink_cost_panel.grid(row=1, column=0)
+drink_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=drink_cost_var)
+drink_cost_text.grid(row=1, column=1, padx=41)
+
+# Variables
+dessert_cost_var=StringVar()
+
+# Cost labels and input fields
+dessert_cost_panel = Label(cost_panel, text='Dessert Cost', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+dessert_cost_panel.grid(row=2, column=0)
+dessert_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=dessert_cost_var)
+dessert_cost_text.grid(row=2, column=1, padx=41)
+
+# Variables
+subtotal_cost_var=StringVar()
+
+# Cost labels and input fields
+subtotal_cost_panel = Label(cost_panel, text='subtotal', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+subtotal_cost_panel.grid(row=0, column=2)
+subtotal_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=subtotal_cost_var)
+subtotal_cost_text.grid(row=0, column=3, padx=41)
+
+# Variables
+taxes_cost_var=StringVar()
+
+# Cost labels and input fields
+taxes_cost_panel = Label(cost_panel, text='taxes', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+taxes_cost_panel.grid(row=1, column=2)
+taxes_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=taxes_cost_var)
+taxes_cost_text.grid(row=1, column=3, padx=41)
+
+# Variables
+Total_cost_var=StringVar()
+
+# Cost labels and input fields
+Total_cost_panel = Label(cost_panel, text='Total', font=('Dosis', 12, 'bold'), bg='azure4', fg='white')
+Total_cost_panel.grid(row=2, column=2)
+Total_cost_text = Entry(cost_panel, font=('Dosis', 12, 'bold'), state='readonly', width=10, textvariable=Total_cost_var)
+Total_cost_text.grid(row=2, column=3, padx=41)
+
+# Buttons
+buttons = ['Total', 'Invoice']
+created_buttons = []
+column = 0
+for button in buttons:
+    button = Button(buttons_panel, text=button.title(), fg='white', font=('Dosis', 14, 'bold'), bd=1,
+                    bg='azure4', width=9)
+    created_buttons.append(button)
+    button.grid(row=0, column=column+1)
+    column += 1
+
+created_buttons[0].config(command=total_calculation)
+created_buttons[1].config(command=create_invoice)
+# Invoice Area
+invoice_text = Text(invoice_panel, font=('Dosis', 12, 'bold'), bd=1, width=52, height=10)
+invoice_text.grid(row=0, column=0)
+
+# Calculator
+calculator_display = Entry(calculator_panel, font=('Dosis', 16, 'bold'), width=40, bd=1)
+calculator_display.grid(row=0, column=0, columnspan=4)
+
+calculator_buttons = ['7', '8', '9', '+',
+                      '4', '5', '6', '-',
+                      '1', '2', '3', 'x',
+                      'CE', 'Delete', '0', '/']
+stored_buttons = []
+
+my_row = 1
+my_column = 0
+
+for button in calculator_buttons:
+    button = Button(calculator_panel, text=button.title(), width=16, fg='white', bg='azure4', bd=1)
+    stored_buttons.append(button)
+    button.grid(row=my_row, column=my_column)
+
+    if my_column == 3:
+        my_row += 1
+
+    my_column += 1
+
+    if my_column == 4:
+        my_column = 0
+
+stored_buttons[0].config(command=lambda: click_button('7'))
+stored_buttons[1].config(command=lambda: click_button('8'))
+stored_buttons[2].config(command=lambda: click_button('9'))
+stored_buttons[3].config(command=lambda: click_button('/'))
+stored_buttons[4].config(command=lambda: click_button('4'))
+stored_buttons[5].config(command=lambda: click_button('5'))
+stored_buttons[6].config(command=lambda: click_button('6'))
+stored_buttons[7].config(command=lambda: click_button('-'))
+stored_buttons[8].config(command=lambda: click_button('1'))
+stored_buttons[9].config(command=lambda: click_button('2'))
+stored_buttons[10].config(command=lambda: click_button('3'))
+stored_buttons[11].config(command=lambda: click_button('*'))
+stored_buttons[12].config(command=get_result)
+stored_buttons[13].config(command=delete_all)
+stored_buttons[14].config(command=lambda: click_button('0'))
+stored_buttons[15].config(command=lambda: click_button('/'))
+
+# Prevent window from closing
+application.mainloop()
+
